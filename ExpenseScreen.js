@@ -42,7 +42,7 @@ export default function ExpenseScreen() {
     }
 
     await db.runAsync(
-      'INSERT INTO expenses (amount, category, note) VALUES (?, ?, ?);',
+      'INSERT INTO expenses (amount, category, note) VALUES (?, ?, ? datetime("now"));',
       [amountNumber, trimmedCategory, trimmedNote || null]
     );
 
@@ -81,7 +81,8 @@ export default function ExpenseScreen() {
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           amount REAL NOT NULL,
           category TEXT NOT NULL,
-          note TEXT
+          note TEXT,
+          date TEXT not NULL
         );
       `);
 
