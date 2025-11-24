@@ -21,7 +21,7 @@ export default function ExpenseScreen() {
 
   const loadExpenses = async () => {
     const rows = await db.getAllAsync(
-      'SELECT * FROM expenses ORDER BY id DESC;'
+      'SELECT * FROM expenses ORDER BY date DESC, id DESC;'
     );
     setExpenses(rows);
   };
@@ -40,11 +40,13 @@ export default function ExpenseScreen() {
       // Category is required
       return;
     }
+    const today = new Date().toISOString().split('T')[0];
+  await db.runAsync(
+    'INSERT INTO expenses (amount, category, note, date) VALUES (?, ?, ?, ?);',
+    [amountNumber, trimmedCategory, trimmedNote || null, today]
+  );
 
-    await db.runAsync(
-      'INSERT INTO expenses (amount, category, note) VALUES (?, ?, ? datetime("now"));',
-      [amountNumber, trimmedCategory, trimmedNote || null]
-    );
+
 
     setAmount('');
     setCategory('');
@@ -82,7 +84,7 @@ export default function ExpenseScreen() {
           amount REAL NOT NULL,
           category TEXT NOT NULL,
           note TEXT,
-          date TEXT not NULL
+          date TEXT NOT NULL
         );
       `);
 
