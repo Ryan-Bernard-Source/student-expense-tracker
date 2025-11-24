@@ -18,6 +18,33 @@ export default function ExpenseScreen() {
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [note, setNote] = useState('');
+  const [filter, setFilter] = useState('all'); // 'all' | 'week' | 'month'
+  const [filteredExpenses, setFilteredExpenses] = useState([]);
+
+  const filterExpenses = () => {
+    const now = new Date();
+    let filtered = [...expenses];
+
+    if (filter === 'week') {
+    const startOfWeek = new Date(now); 
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    const endOfWeek = new Date(startOfWeek); 
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+    filtered = filtered.filter(e => {
+      const d = new Date(e.date);
+      return d >= startOfWeek && d <= endOfWeek;
+      });
+    }   else if (filter === 'month') {
+      filtered = filtered.filter(e => {
+        const d = new Date(e.date);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      });
+    }
+
+    setFilteredExpenses(filtered);
+  };
+useEffect(() => { filterExpenses(); }, [expenses, filter]);
 
   const loadExpenses = async () => {
     const rows = await db.getAllAsync(
@@ -124,8 +151,16 @@ export default function ExpenseScreen() {
         <Button title="Add Expense" onPress={addExpense} />
       </View>
 
+    <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 16 }}>
+     <Button title="All" onPress={() => setFilter('all')} color={filter === 'all' ? '#fbbf24' : '#374151'} />
+     <Button title="This Week" onPress={() => setFilter('week')} color={filter === 'week' ? '#fbbf24' : '#374151'} />
+      <Button title="This Month" onPress={() => setFilter('month')} color={filter === 'month' ? '#fbbf24' : '#374151'} />
+    </View>
+
+
+
       <FlatList
-        data={expenses}
+        data={filteredExpenses}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderExpense}
         ListEmptyComponent={
