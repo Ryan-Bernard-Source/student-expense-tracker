@@ -158,24 +158,28 @@ useEffect(() => { filterExpenses(); }, [expenses, filter]);
         <Button title="Add Expense" onPress={addExpense} />
       </View>
 
-    <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 16 }}>
-      {['all', 'week', 'month'].map(f => (
-        <TouchableOpacity
-          key={f}
-          style={{
-            padding: 8,
-            borderRadius: 8,
-            backgroundColor: filter === f ? '#24bafb' : '#374151',
-          }}
-          onPress={() => setFilter(f)}
-        >
-          <Text style={{ color: filter === f ? '#111827' : '#fff', fontWeight: '700', textTransform: 'capitalize' }}>
-            {f}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </View>
     <View style={{ marginBottom: 16 }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 8 }}>
+        {['all', 'week', 'month'].map(f => (
+          <TouchableOpacity
+            key={f}
+            onPress={() => setFilter(f)}
+            style={{
+              padding: 8,
+              borderRadius: 8,
+              backgroundColor: filter === f ? '#24bafb' : '#374151',
+            }}
+          >
+            <Text style={{
+              color: filter === f ? '#111827' : '#fff',
+              fontWeight: '700',
+              textTransform: 'capitalize',
+            }}>
+              {f}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
       <Text style={{ color: '#c2bfb6ff', fontWeight: '700', fontSize: 16 }}>
         Total Spending: ${totalSpending.toFixed(2)}
       </Text>
