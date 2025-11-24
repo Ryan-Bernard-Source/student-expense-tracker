@@ -92,6 +92,8 @@ useEffect(() => { filterExpenses(); }, [expenses, filter]);
         <Text style={styles.expenseAmount}>${Number(item.amount).toFixed(2)}</Text>
         <Text style={styles.expenseCategory}>{item.category}</Text>
         {item.note ? <Text style={styles.expenseNote}>{item.note}</Text> : null}
+        {/* Add date display */}
+        <Text style={styles.expenseNote}>{item.date}</Text>
       </View>
 
       <TouchableOpacity onPress={() => deleteExpense(item.id)}>
@@ -99,6 +101,7 @@ useEffect(() => { filterExpenses(); }, [expenses, filter]);
       </TouchableOpacity>
     </View>
   );
+
 
   useEffect(() => {
     async function setup() {
@@ -156,11 +159,22 @@ useEffect(() => { filterExpenses(); }, [expenses, filter]);
       </View>
 
     <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 16 }}>
-     <Button title="All" onPress={() => setFilter('all')} color={filter === 'all' ? '#24bafbff' : '#374151'} />
-     <Button title="Weekly" onPress={() => setFilter('week')} color={filter === 'week' ? '#24bafbff' : '#374151'} />
-      <Button title="Monthly" onPress={() => setFilter('month')} color={filter === 'month' ? '#24bafbff' : '#374151'} />
+      {['all', 'week', 'month'].map(f => (
+        <TouchableOpacity
+          key={f}
+          style={{
+            padding: 8,
+            borderRadius: 8,
+            backgroundColor: filter === f ? '#24bafb' : '#374151',
+          }}
+          onPress={() => setFilter(f)}
+        >
+          <Text style={{ color: filter === f ? '#111827' : '#fff', fontWeight: '700', textTransform: 'capitalize' }}>
+            {f}
+          </Text>
+        </TouchableOpacity>
+      ))}
     </View>
-
     <View style={{ marginBottom: 16 }}>
       <Text style={{ color: '#c2bfb6ff', fontWeight: '700', fontSize: 16 }}>
         Total Spending: ${totalSpending.toFixed(2)}
@@ -187,6 +201,8 @@ useEffect(() => { filterExpenses(); }, [expenses, filter]);
     </SafeAreaView>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#111827' },
@@ -245,4 +261,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 12,
   },
+  expenseDate: { fontSize: 12, color: '#9ca3af' 
+  }
 });
