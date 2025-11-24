@@ -20,7 +20,8 @@ export default function ExpenseScreen() {
   const [note, setNote] = useState('');
   const [filter, setFilter] = useState('all'); // 'all' | 'week' | 'month'
   const [filteredExpenses, setFilteredExpenses] = useState([]);
-
+  const [editingExpense, setEditingExpense] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
   const filterExpenses = () => {
     const now = new Date();
     let filtered = [...expenses];
@@ -84,7 +85,6 @@ useEffect(() => { filterExpenses(); }, [expenses, filter]);
     await db.runAsync('DELETE FROM expenses WHERE id = ?;', [id]);
     loadExpenses();
   };
-
   // Expense Render
   const renderExpense = ({ item }) => (
     <View style={styles.expenseRow}>
