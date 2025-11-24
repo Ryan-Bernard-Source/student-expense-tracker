@@ -71,9 +71,7 @@ useEffect(() => { filterExpenses(); }, [expenses, filter]);
   await db.runAsync(
     'INSERT INTO expenses (amount, category, note, date) VALUES (?, ?, ?, ?);',
     [amountNumber, trimmedCategory, trimmedNote || null, today]
-  );
-
-
+  ); // Update to add date to added expenses
 
     setAmount('');
     setCategory('');
@@ -82,13 +80,12 @@ useEffect(() => { filterExpenses(); }, [expenses, filter]);
     loadExpenses();
   };
 
-
   const deleteExpense = async (id) => {
     await db.runAsync('DELETE FROM expenses WHERE id = ?;', [id]);
     loadExpenses();
   };
 
-
+  // Expense Render
   const renderExpense = ({ item }) => (
     <View style={styles.expenseRow}>
       <View style={{ flex: 1 }}>
@@ -120,7 +117,14 @@ useEffect(() => { filterExpenses(); }, [expenses, filter]);
 
     setup();
   }, []);
-
+// Display Total Spending
+  const totalSpending = filteredExpenses.reduce((acc, e) => acc + Number(e.amount), 0);
+   const categoryTotals = filteredExpenses.reduce((acc, e) => {
+  if (!acc[e.category]) acc[e.category] = 0;
+   acc[e.category] += Number(e.amount);
+   return acc;
+  }, {});
+  
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.heading}>Student Expense Tracker</Text>
@@ -152,12 +156,21 @@ useEffect(() => { filterExpenses(); }, [expenses, filter]);
       </View>
 
     <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 16 }}>
-     <Button title="All" onPress={() => setFilter('all')} color={filter === 'all' ? '#fbbf24' : '#374151'} />
-     <Button title="This Week" onPress={() => setFilter('week')} color={filter === 'week' ? '#fbbf24' : '#374151'} />
-      <Button title="This Month" onPress={() => setFilter('month')} color={filter === 'month' ? '#fbbf24' : '#374151'} />
+     <Button title="All" onPress={() => setFilter('all')} color={filter === 'all' ? '#24bafbff' : '#374151'} />
+     <Button title="Weekly" onPress={() => setFilter('week')} color={filter === 'week' ? '#24bafbff' : '#374151'} />
+      <Button title="Monthly" onPress={() => setFilter('month')} color={filter === 'month' ? '#24bafbff' : '#374151'} />
     </View>
 
-
+    <View style={{ marginBottom: 16 }}>
+      <Text style={{ color: '#c2bfb6ff', fontWeight: '700', fontSize: 16 }}>
+        Total Spending: ${totalSpending.toFixed(2)}
+      </Text>
+      {Object.entries(categoryTotals).map(([cat, amt]) => (
+        <Text key={cat} style={{ color: '#e5e7eb', fontSize: 14 }}>
+          {cat}: ${amt.toFixed(2)}
+        </Text>
+      ))}
+    </View>
 
       <FlatList
         data={filteredExpenses}
@@ -206,7 +219,7 @@ const styles = StyleSheet.create({
   expenseAmount: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#fbbf24',
+    color: '#f0eee7ff',
   },
   expenseCategory: {
     fontSize: 14,
