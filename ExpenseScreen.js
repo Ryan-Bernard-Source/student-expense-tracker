@@ -22,48 +22,44 @@ export default function ExpenseScreen() {
   const [filteredExpenses, setFilteredExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const filterExpenses = () => {
-    const now = new Date();
-    let filtered = [...expenses];
-
-    if (filter === 'week') {
-    const startOfWeek = new Date(now); 
-    startOfWeek.setDate(now.getDate() - now.getDay());
-    const endOfWeek = new Date(startOfWeek); 
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-
-    filtered = filtered.filter(e => {
-      const d = new Date(e.date);
-      return d >= startOfWeek && d <= endOfWeek;
-      });
-    }   else if (filter === 'month') {
-      filtered = filtered.filter(e => {
-        const d = new Date(e.date);
-        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-      });
-    }
-
-    setFilteredExpenses(filtered);
-  };
-useEffect(() => { filterExpenses(); }, [expenses, filter]);
-
   const loadExpenses = async () => {
     const rows = await db.getAllAsync(
       'SELECT * FROM expenses ORDER BY date DESC, id DESC;'
     );
     setExpenses(rows);
   };
-  const addExpense = async () => {
-    const amountNumber = parseFloat(amount);
+    const filterExpenses = () => {
+    const now = new Date();
+    let filtered = [...expenses];
+    if (filter === 'week') {
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay());
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
 
+      filtered = filtered.filter(e => {
+        const d = new Date(e.date);
+        return d >= startOfWeek && d <= endOfWeek;
+      });
+    } else if (filter === 'month') {
+      filtered = filtered.filter(e => {
+        const d = new Date(e.date);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      });
+    }
+    setFilteredExpenses(filtered);
+  };
+  useEffect(() => {
+    filterExpenses();
+  }, [expenses, filter]);
+  const addExpense = async () => {
+    const amountNumber = parseFloat(amount)
     if (isNaN(amountNumber) || amountNumber <= 0) {
-      // Basic validation: ignore invalid or non-positive amounts
       return;
     }
-
+    
     const trimmedCategory = category.trim();
     const trimmedNote = note.trim();
-
     if (!trimmedCategory) {
       // Category is required
       return;
@@ -80,27 +76,49 @@ useEffect(() => { filterExpenses(); }, [expenses, filter]);
 
     loadExpenses();
   };
-
+  // Edit Expense UI
+    const saveEdit = async () => {
+    if (!editingExpense) return;
+    const amountNumber = parseFloat(amount);
+    if (isNaN(amountNumber) || !category.trim()) return;
+    await db.runAsync(
+      'UPDATE expenses SET amount = ?, category = ?, note = ? WHERE id = ?;',
+      [amountNumber, category.trim(), note.trim(), editingExpense.id]
+    );
+    setEditingExpense(null);
+    setAmount('');
+    setCategory('');
+    setNote('');
+    loadExpenses();
+  };
+  // Delete Expense
   const deleteExpense = async (id) => {
     await db.runAsync('DELETE FROM expenses WHERE id = ?;', [id]);
     loadExpenses();
   };
   // Expense Render
   const renderExpense = ({ item }) => (
-    <View style={styles.expenseRow}>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.expenseAmount}>${Number(item.amount).toFixed(2)}</Text>
-        <Text style={styles.expenseCategory}>{item.category}</Text>
-        {item.note ? <Text style={styles.expenseNote}>{item.note}</Text> : null}
-        {/* Add date display */}
-        <Text style={styles.expenseNote}>{item.date}</Text>
-      </View>
+  <View style={styles.expenseRow}>
+    <TouchableOpacity style={{ flex: 1 }} onPress={() => startEditing(item)}>
+      <Text style={styles.expenseAmount}>${Number(item.amount).toFixed(2)}</Text>
+      <Text style={styles.expenseCategory}>{item.category}</Text>
+      {item.note ? <Text style={styles.expenseNote}>{item.note}</Text> : null}
+      <Text style={styles.expenseDate}>{item.date}</Text>
+    </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => deleteExpense(item.id)}>
-        <Text style={styles.delete}>✕</Text>
-      </TouchableOpacity>
-    </View>
-  );
+    <TouchableOpacity onPress={() => deleteExpense(item.id)}>
+      <Text style={styles.delete}>✕</Text>
+    </TouchableOpacity>
+  </View>
+);
+
+const startEditing = (expense) => {
+  setEditingExpense(expense);
+  setAmount(expense.amount.toString());
+  setCategory(expense.category);
+  setNote(expense.note || '');
+  setModalVisible(true);
+};
 
 
   useEffect(() => {
@@ -155,7 +173,10 @@ useEffect(() => { filterExpenses(); }, [expenses, filter]);
           value={note}
           onChangeText={setNote}
         />
-        <Button title="Add Expense" onPress={addExpense} />
+    <Button
+      title={editingExpense ? "Save Changes" : "Add Expense"}
+      onPress={editingExpense ? saveEdit : addExpense}
+    />
       </View>
 
     <View style={{ marginBottom: 16 }}>
@@ -198,16 +219,12 @@ useEffect(() => { filterExpenses(); }, [expenses, filter]);
           <Text style={styles.empty}>No expenses yet.</Text>
         }
       />
-
       <Text style={styles.footer}>
         Enter your expenses and they’ll be saved locally with SQLite.
       </Text>
     </SafeAreaView>
   );
 }
-
-
-
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#111827' },
   heading: {
