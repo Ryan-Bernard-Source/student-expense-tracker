@@ -8,7 +8,7 @@ const PieChart = ({ categoryTotals }) => {
     y: Number(amount),
   }));
 
-  // Color palette for slices
+  // Color palette for category slices
   const colors = [
     '#24bafb', '#60a5fa', '#f472b6', '#fbbf24',
     '#34d399', '#8b5cf6', '#fb923c', '#10b981',
@@ -76,7 +76,7 @@ const PieChart = ({ categoryTotals }) => {
         })}
       </View>
 
-      {/* Legend */}
+      {/* Key */}
       <View style={{ marginTop: 8 }}>
         <Text style={{ fontSize: 14, fontWeight: '700', color: '#fff', marginBottom: 12 }}>
           Category Breakdown
