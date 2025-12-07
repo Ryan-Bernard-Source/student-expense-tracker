@@ -8,8 +8,10 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  ScrollView,
 } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
+import PieChart from './PieChart';
 
 export default function ExpenseScreen() {
   const db = useSQLiteContext();
@@ -148,80 +150,92 @@ const startEditing = (expense) => {
   
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.heading}>Student Expense Tracker</Text>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <Text style={styles.heading}>Student Expense Tracker</Text>
 
-      <View style={styles.form}>
-        <TextInput
-          style={styles.input}
-          placeholder="Amount (e.g. 12.50)"
-          placeholderTextColor="#9ca3af"
-          keyboardType="numeric"
-          value={amount}
-          onChangeText={setAmount}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Category (Food, Books, Rent...)"
-          placeholderTextColor="#9ca3af"
-          value={category}
-          onChangeText={setCategory}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Note (optional)"
-          placeholderTextColor="#9ca3af"
-          value={note}
-          onChangeText={setNote}
-        />
-    <Button
-      title={editingExpense ? "Save Changes" : "Add Expense"}
-      onPress={editingExpense ? saveEdit : addExpense}
-    />
-      </View>
+        <View style={styles.form}>
+          <TextInput
+            style={styles.input}
+            placeholder="Amount (e.g. 12.50)"
+            placeholderTextColor="#9ca3af"
+            keyboardType="numeric"
+            value={amount}
+            onChangeText={setAmount}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Category (Food, Books, Rent...)"
+            placeholderTextColor="#9ca3af"
+            value={category}
+            onChangeText={setCategory}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Note (optional)"
+            placeholderTextColor="#9ca3af"
+            value={note}
+            onChangeText={setNote}
+          />
+          <Button
+            title={editingExpense ? "Save Changes" : "Add Expense"}
+            onPress={editingExpense ? saveEdit : addExpense}
+          />
+        </View>
 
-    <View style={{ marginBottom: 16 }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 8 }}>
-        {['all', 'week', 'month'].map(f => (
-          <TouchableOpacity
-            key={f}
-            onPress={() => setFilter(f)}
-            style={{
-              padding: 8,
-              borderRadius: 8,
-              backgroundColor: filter === f ? '#24bafb' : '#374151',
-            }}
-          >
-            <Text style={{
-              color: filter === f ? '#111827' : '#fff',
-              fontWeight: '700',
-              textTransform: 'capitalize',
-            }}>
-              {f}
+        <View style={{ marginBottom: 16, paddingHorizontal: 0 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 8 }}>
+            {['all', 'week', 'month'].map(f => (
+              <TouchableOpacity
+                key={f}
+                onPress={() => setFilter(f)}
+                style={{
+                  padding: 8,
+                  borderRadius: 8,
+                  backgroundColor: filter === f ? '#24bafb' : '#374151',
+                }}
+              >
+                <Text style={{
+                  color: filter === f ? '#111827' : '#fff',
+                  fontWeight: '700',
+                  textTransform: 'capitalize',
+                }}>
+                  {f}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <View style={{ paddingHorizontal: 16 }}>
+            <Text style={{ color: '#c2bfb6ff', fontWeight: '700', fontSize: 16 }}>
+              Total Spending: ${totalSpending.toFixed(2)}
             </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      <Text style={{ color: '#c2bfb6ff', fontWeight: '700', fontSize: 16 }}>
-        Total Spending: ${totalSpending.toFixed(2)}
-      </Text>
-      {Object.entries(categoryTotals).map(([cat, amt]) => (
-        <Text key={cat} style={{ color: '#e5e7eb', fontSize: 14 }}>
-          {cat}: ${amt.toFixed(2)}
-        </Text>
-      ))}
-    </View>
+            {Object.entries(categoryTotals).map(([cat, amt]) => (
+              <Text key={cat} style={{ color: '#e5e7eb', fontSize: 14 }}>
+                {cat}: ${amt.toFixed(2)}
+              </Text>
+            ))}
+          </View>
+        </View>
 
-      <FlatList
-        data={filteredExpenses}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderExpense}
-        ListEmptyComponent={
-          <Text style={styles.empty}>No expenses yet.</Text>
-        }
-      />
-      <Text style={styles.footer}>
-        Enter your expenses and they’ll be saved locally with SQLite.
-      </Text>
+        <PieChart categoryTotals={categoryTotals} />
+
+        <Text style={{ paddingHorizontal: 16, fontSize: 16, fontWeight: '700', color: '#fff', marginBottom: 12 }}>
+          Recent Expenses
+        </Text>
+        <View style={{ paddingHorizontal: 16 }}>
+          <FlatList
+            scrollEnabled={false}
+            data={filteredExpenses}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderExpense}
+            ListEmptyComponent={
+              <Text style={styles.empty}>No expenses yet.</Text>
+            }
+          />
+        </View>
+        <Text style={styles.footer}>
+          Enter your expenses and they'll be saved locally with SQLite.
+        </Text>
+      </ScrollView>
     </SafeAreaView>
   );
 }
